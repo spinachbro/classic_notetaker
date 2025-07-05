@@ -16,7 +16,7 @@
                     <div class="entry-item">
                         <div class="entry-header">
                             <span class="entry-date">{{ entry.date_added.strftime('%B %d, %Y') }}</span>
-                            <a href="{{ url_for('edit_entry', entry_id=entry.id) }}" class="edit-link">Edit</a>
+                            <a href="{{ url_for('main.edit_entry', entry_id=entry.id) }}" class="edit-link">Edit</a>
                         </div>
                         <div class="entry-text">{{ entry.text }}</div>
                     </div>
@@ -27,7 +27,7 @@
         {% endif %}
         
         <div class="action-buttons">
-            <a href="{{ url_for('new_entry', topic_id=topic.id) }}" class="btn btn-primary">Add New Entry</a>
+            <a href="{{ url_for('main.new_entry', topic_id=topic.id) }}" class="btn btn-primary">Add New Entry</a>
         </div>
     </div>
 </div>

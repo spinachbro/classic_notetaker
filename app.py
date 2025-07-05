@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,14 +9,13 @@ from config import config
 app = Flask(__name__)
 app.config.from_object(config['production'])
 
-# Configure URL prefix for the application
-app.config['APPLICATION_ROOT'] = '/classic-notetaker'
-app.config['PREFERRED_URL_SCHEME'] = 'https'
+# Create a Blueprint for the app with URL prefix
+main = Blueprint('main', __name__, url_prefix='/classic-notetaker')
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'main.login'
 
 # Models
 class User(UserMixin, db.Model):
@@ -43,11 +42,11 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Routes
-@app.route('/')
+@main.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@main.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -63,11 +62,11 @@ def register():
         
         login_user(user)
         flash('Registration successful!')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     
     return render_template('register.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -77,37 +76,37 @@ def login():
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             flash('Logged in successfully!')
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
         else:
             flash('Invalid username or password')
     
     return render_template('login.html')
 
-@app.route('/logout')
+@main.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('Logged out successfully!')
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
-@app.route('/topics')
+@main.route('/topics')
 @login_required
 def topics():
     topics = Topic.query.filter_by(user_id=current_user.id).order_by(Topic.date_added).all()
     return render_template('topics.html', topics=topics)
 
-@app.route('/topics/<int:topic_id>')
+@main.route('/topics/<int:topic_id>')
 @login_required
 def topic(topic_id):
     topic = Topic.query.get_or_404(topic_id)
     if topic.user_id != current_user.id:
         flash('You do not have permission to view this topic.')
-        return redirect(url_for('topics'))
+        return redirect(url_for('main.topics'))
     
     entries = Entry.query.filter_by(topic_id=topic_id).order_by(Entry.date_added.desc()).all()
     return render_template('topic.html', topic=topic, entries=entries)
 
-@app.route('/new_topic', methods=['GET', 'POST'])
+@main.route('/new_topic', methods=['GET', 'POST'])
 @login_required
 def new_topic():
     if request.method == 'POST':
@@ -117,19 +116,19 @@ def new_topic():
             db.session.add(topic)
             db.session.commit()
             flash('Topic added successfully!')
-            return redirect(url_for('topics'))
+            return redirect(url_for('main.topics'))
         else:
             flash('Topic text cannot be empty')
     
     return render_template('new_topic.html')
 
-@app.route('/new_entry/<int:topic_id>', methods=['GET', 'POST'])
+@main.route('/new_entry/<int:topic_id>', methods=['GET', 'POST'])
 @login_required
 def new_entry(topic_id):
     topic = Topic.query.get_or_404(topic_id)
     if topic.user_id != current_user.id:
         flash('You do not have permission to add entries to this topic.')
-        return redirect(url_for('topics'))
+        return redirect(url_for('main.topics'))
     
     if request.method == 'POST':
         text = request.form['text']
@@ -138,19 +137,19 @@ def new_entry(topic_id):
             db.session.add(entry)
             db.session.commit()
             flash('Entry added successfully!')
-            return redirect(url_for('topic', topic_id=topic_id))
+            return redirect(url_for('main.topic', topic_id=topic_id))
         else:
             flash('Entry text cannot be empty')
     
     return render_template('new_entry.html', topic=topic)
 
-@app.route('/edit_entry/<int:entry_id>', methods=['GET', 'POST'])
+@main.route('/edit_entry/<int:entry_id>', methods=['GET', 'POST'])
 @login_required
 def edit_entry(entry_id):
     entry = Entry.query.get_or_404(entry_id)
     if entry.topic.user_id != current_user.id:
         flash('You do not have permission to edit this entry.')
-        return redirect(url_for('topics'))
+        return redirect(url_for('main.topics'))
     
     if request.method == 'POST':
         text = request.form['text']
@@ -158,11 +157,14 @@ def edit_entry(entry_id):
             entry.text = text
             db.session.commit()
             flash('Entry updated successfully!')
-            return redirect(url_for('topic', topic_id=entry.topic_id))
+            return redirect(url_for('main.topic', topic_id=entry.topic_id))
         else:
             flash('Entry text cannot be empty')
     
     return render_template('edit_entry.html', entry=entry, topic=entry.topic)
+
+# Register the blueprint
+app.register_blueprint(main)
 
 if __name__ == '__main__':
     with app.app_context():

@@ -9,15 +9,15 @@
 <body>
     <nav>
         <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="nav-brand">Classic Notetaker</a>
+            <a href="{{ url_for('main.index') }}" class="nav-brand">Classic Notetaker</a>
             <div class="nav-links">
-                <a href="{{ url_for('topics') }}">Topics</a>
+                <a href="{{ url_for('main.topics') }}">Topics</a>
                 {% if current_user.is_authenticated %}
                     <span class="user-greeting">Hello, {{ current_user.username }}.</span>
-                    <a href="{{ url_for('logout') }}" class="logout-btn">Log out</a>
+                    <a href="{{ url_for('main.logout') }}" class="logout-btn">Log out</a>
                 {% else %}
-                    <a href="{{ url_for('register') }}">Register</a>
-                    <a href="{{ url_for('login') }}">Log in</a>
+                    <a href="{{ url_for('main.register') }}">Register</a>
+                    <a href="{{ url_for('main.login') }}">Log in</a>
                 {% endif %}
             </div>
         </div>
