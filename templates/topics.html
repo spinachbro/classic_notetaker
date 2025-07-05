@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Log - Topics{% endblock %}
+
+{% block content %}
+<div class="topics-section">
+    <h2>Topics</h2>
+    
+    {% if topics %}
+        <div class="topics-list">
+            {% for topic in topics %}
+                <div class="topic-item">
+                    <h3><a href="{{ url_for('topic', topic_id=topic.id) }}">{{ topic.text }}</a></h3>
+                    <p class="topic-date">Added: {{ topic.date_added.strftime('%B %d, %Y') }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No topics have been added yet.</p>
+    {% endif %}
+    
+    <div class="action-buttons">
+        <a href="{{ url_for('new_topic') }}" class="btn btn-primary">Add New Topic</a>
+    </div>
+</div>
+{% endblock %} 

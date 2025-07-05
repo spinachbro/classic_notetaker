@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Classic Notetaker - Home{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <h1>Welcome to Classic Notetaker</h1>
+    <p>Classic Notetaker helps you keep track of your notes, for any topic you want to organize.</p>
+    
+    {% if current_user.is_authenticated %}
+        <div class="action-buttons">
+            <a href="{{ url_for('topics') }}" class="btn btn-primary">View Your Topics</a>
+            <a href="{{ url_for('new_topic') }}" class="btn btn-secondary">Add New Topic</a>
+        </div>
+    {% else %}
+        <div class="action-buttons">
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Log In</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

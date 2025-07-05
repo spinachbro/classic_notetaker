@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Learning Log - Add New Topic{% endblock %}
+
+{% block content %}
+<div class="form-section">
+    <h2>Add New Topic</h2>
+    <form method="POST">
+        <div class="form-group">
+            <label for="text">Topic:</label>
+            <input type="text" id="text" name="text" required>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add Topic</button>
+            <a href="{{ url_for('topics') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 
